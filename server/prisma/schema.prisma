@@ -1,0 +1,111 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Society {
+  id              String           @id @default(uuid())
+  name            String
+  description     String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  deletedAt       DateTime?
+
+  users           User[]
+  roles           Role[]
+  permissions     Permission[]
+  rolePermissions RolePermission[]
+  members         Member[]
+
+  @@index([deletedAt])
+}
+
+model Role {
+  id              String           @id @default(uuid())
+  name            String
+  description     String?
+  societyId       String
+  society         Society          @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  users           User[]
+  rolePermissions RolePermission[]
+
+  @@unique([name, societyId])
+  @@index([societyId])
+}
+
+model Permission {
+  id              String           @id @default(uuid())
+  name            String           // e.g. "member:read", "member:create", "member:update", "member:delete"
+  description     String?
+  societyId       String
+  society         Society          @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  rolePermissions RolePermission[]
+
+  @@unique([name, societyId])
+  @@index([societyId])
+}
+
+model RolePermission {
+  roleId       String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permissionId String
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  societyId    String
+  society      Society    @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@id([roleId, permissionId])
+  @@index([societyId])
+}
+
+model User {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  status       String    @default("ACTIVE") // ACTIVE, INACTIVE
+  societyId    String
+  society      Society   @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  roleId       String
+  role         Role      @relation(fields: [roleId], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  member       Member?
+
+  @@index([societyId])
+  @@index([email])
+  @@index([deletedAt])
+}
+
+model Member {
+  id           String    @id @default(uuid())
+  userId       String?   @unique
+  user         User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  societyId    String
+  society      Society   @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  firstName    String
+  lastName     String
+  phone        String?
+  status       String    @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED
+  profileImage String?
+  bio          String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  @@index([societyId])
+  @@index([societyId, deletedAt])
+  @@index([deletedAt])
+}
