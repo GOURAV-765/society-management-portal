@@ -1,0 +1,11 @@
+{
+  "name": "society-management-root",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "client"
+  ],
+  "scripts": {
+    "build": "npm run build -w client"
+  }
+}
