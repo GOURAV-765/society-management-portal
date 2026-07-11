@@ -57,6 +57,13 @@ export const login = async (
     }
 
     // Verify password
+    if (!user.passwordHash) {
+      res.status(401).json({
+        success: false,
+        message: 'Invalid email or password',
+      });
+      return;
+    }
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
       res.status(401).json({
@@ -144,23 +151,184 @@ export const getCurrentUser = async (
     }
 
     const { userId } = req.user;
+    let user;
 
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        society: true,
-        role: {
-          include: {
-            rolePermissions: {
-              include: {
-                permission: true,
+    // Check if the userId is a Clerk ID (starts with "user_") or UUID
+    const isClerkId = userId.startsWith('user_');
+
+    if (isClerkId) {
+      user = await prisma.user.findUnique({
+        where: { clerkId: userId },
+        include: {
+          society: true,
+          role: {
+            include: {
+              rolePermissions: {
+                include: {
+                  permission: true,
+                },
               },
             },
           },
+          member: true,
         },
-        member: true,
-      },
-    });
+      });
+    } else {
+      user = await prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          society: true,
+          role: {
+            include: {
+              rolePermissions: {
+                include: {
+                  permission: true,
+                },
+              },
+            },
+          },
+          member: true,
+        },
+      });
+    }
+
+    // Auto-register or link if user authenticated via Clerk but not found in DB
+    if (!user && isClerkId) {
+      const secretKey = process.env.CLERK_SECRET_KEY;
+      const { createClerkClient } = await import('@clerk/backend');
+      const clerkClient = createClerkClient({ secretKey });
+      const clerkUser = await clerkClient.users.getUser(userId);
+      const email = clerkUser.emailAddresses[0]?.emailAddress;
+
+      if (!email) {
+        res.status(400).json({
+          success: false,
+          message: 'Clerk account does not have a valid email address.',
+        });
+        return;
+      }
+
+      // Check if user exists by email
+      let existingUser = await prisma.user.findUnique({
+        where: { email },
+        include: {
+          society: true,
+          role: {
+            include: {
+              rolePermissions: {
+                include: {
+                  permission: true,
+                },
+              },
+            },
+          },
+          member: true,
+        },
+      });
+
+      if (existingUser) {
+        // Link clerkId to existing user record
+        user = await prisma.user.update({
+          where: { id: existingUser.id },
+          data: { clerkId: userId },
+          include: {
+            society: true,
+            role: {
+              include: {
+                rolePermissions: {
+                  include: {
+                    permission: true,
+                  },
+                },
+              },
+            },
+            member: true,
+          },
+        });
+      } else {
+        // Retrieve roleId and societyId from Clerk publicMetadata if they exist (sent via invitation)
+        const metadataSocietyId = clerkUser.publicMetadata?.societyId as string | undefined;
+        const metadataRoleId = clerkUser.publicMetadata?.roleId as string | undefined;
+
+        let targetSocietyId = metadataSocietyId;
+        let targetRoleId = metadataRoleId;
+
+        // 1. Resolve Society (metadata or fallback to first available)
+        if (!targetSocietyId) {
+          const defaultSociety = await prisma.society.findFirst();
+          if (!defaultSociety) {
+            res.status(500).json({
+              success: false,
+              message: 'No societies configured in database.',
+            });
+            return;
+          }
+          targetSocietyId = defaultSociety.id;
+        }
+
+        // 2. Resolve Role (metadata or fallback to General Member)
+        if (!targetRoleId) {
+          let defaultRole = await prisma.role.findFirst({
+            where: {
+              societyId: targetSocietyId,
+              name: 'General Member',
+            },
+          });
+
+          if (!defaultRole) {
+            defaultRole = await prisma.role.findFirst({
+              where: { societyId: targetSocietyId },
+            });
+          }
+
+          if (!defaultRole) {
+            res.status(500).json({
+              success: false,
+              message: 'No roles configured in database.',
+            });
+            return;
+          }
+          targetRoleId = defaultRole.id;
+        }
+
+        const firstName = clerkUser.firstName || email.split('@')[0];
+        const lastName = clerkUser.lastName || '';
+
+        // 3. Create User & Member
+        user = await prisma.user.create({
+          data: {
+            email,
+            clerkId: userId,
+            status: 'ACTIVE',
+            societyId: targetSocietyId,
+            roleId: targetRoleId,
+            member: {
+              create: {
+                societyId: targetSocietyId,
+                firstName,
+                lastName,
+                phone: clerkUser.phoneNumbers[0]?.phoneNumber || null,
+                profileImage: clerkUser.imageUrl || null,
+                status: 'ACTIVE',
+              },
+            },
+          },
+          include: {
+            society: true,
+            role: {
+              include: {
+                rolePermissions: {
+                  include: {
+                    permission: true,
+                  },
+                },
+              },
+            },
+            member: true,
+          },
+        });
+      }
+    }
 
     if (!user || user.deletedAt) {
       res.status(404).json({

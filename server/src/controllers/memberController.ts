@@ -425,3 +425,64 @@ export const getRoles = async (
     next(error);
   }
 };
+
+export const inviteMember = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const { email, roleId } = req.body;
+    const societyId = req.user?.societyId;
+
+    if (!societyId) {
+      res.status(401).json({ success: false, message: 'Unauthorized' });
+      return;
+    }
+
+    if (!email || !roleId) {
+      res.status(400).json({ success: false, message: 'Email and Role are required.' });
+      return;
+    }
+
+    // Verify role exists in the society
+    const role = await prisma.role.findFirst({
+      where: { id: roleId, societyId },
+    });
+
+    if (!role) {
+      res.status(400).json({ success: false, message: 'Invalid role selected.' });
+      return;
+    }
+
+    // Create Clerk invitation
+    const secretKey = process.env.CLERK_SECRET_KEY;
+    const { createClerkClient } = await import('@clerk/backend');
+    const clerkClient = createClerkClient({ secretKey });
+
+    const clientUrl = process.env.ALLOWED_ORIGINS 
+      ? process.env.ALLOWED_ORIGINS.split(',')[0]
+      : 'http://localhost:5173';
+
+    const invitation = await clerkClient.invitations.createInvitation({
+      emailAddress: email,
+      publicMetadata: {
+        roleId,
+        societyId,
+      },
+      redirectUrl: `${clientUrl}/signup`,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Invitation sent successfully.',
+      data: invitation,
+    });
+  } catch (error: any) {
+    console.error('Error creating invitation:', error);
+    res.status(500).json({
+      success: false,
+      message: error.message || 'Failed to send invitation.',
+    });
+  }
+};

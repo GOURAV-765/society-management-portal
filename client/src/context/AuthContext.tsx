@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth as useClerkAuth, useUser as useClerkUser } from '@clerk/clerk-react';
 import api from '../services/api.js';
 
 interface User {
@@ -34,39 +35,56 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isLoaded, isSignedIn, getToken, signOut } = useClerkAuth();
+  const { user: clerkUser } = useClerkUser();
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(localStorage.getItem('auth_token'));
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [token, setToken] = useState<string | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState<boolean>(false);
 
   useEffect(() => {
-    const fetchCurrentUser = async () => {
-      const storedToken = localStorage.getItem('auth_token');
-      if (!storedToken) {
-        setIsLoading(false);
+    const syncSession = async () => {
+      if (!isLoaded) return;
+
+      if (!isSignedIn) {
+        localStorage.removeItem('auth_token');
+        setToken(null);
+        setUser(null);
+        setIsLoadingProfile(false);
         return;
       }
 
+      setIsLoadingProfile(true);
       try {
-        const response = await api.get('/auth/me');
-        if (response.data?.success) {
-          setUser(response.data.user);
-        } else {
-          // Token is invalid, clear it
-          localStorage.removeItem('auth_token');
-          setToken(null);
+        const clerkToken = await getToken();
+        if (clerkToken) {
+          localStorage.setItem('auth_token', clerkToken);
+          setToken(clerkToken);
+
+          // Fetch local user details from backend
+          const response = await api.get('/auth/me');
+          if (response.data?.success) {
+            setUser(response.data.user);
+          } else {
+            console.error('Failed to retrieve user profile from backend');
+            localStorage.removeItem('auth_token');
+            setToken(null);
+            setUser(null);
+          }
         }
       } catch (error) {
-        console.error('Failed to restore authentication session:', error);
+        console.error('Failed to sync Clerk authentication with backend:', error);
         localStorage.removeItem('auth_token');
         setToken(null);
+        setUser(null);
       } finally {
-        setIsLoading(false);
+        setIsLoadingProfile(false);
       }
     };
 
-    fetchCurrentUser();
-  }, [token]);
+    syncSession();
+  }, [isLoaded, isSignedIn, getToken, clerkUser]);
 
+  // login is deprecated but we keep the signature for backwards compatibility
   const login = (newToken: string, newUser: User) => {
     localStorage.setItem('auth_token', newToken);
     setToken(newToken);
@@ -75,9 +93,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      await api.post('/auth/logout');
+      await signOut();
     } catch (error) {
-      console.error('Error during backend logout:', error);
+      console.error('Error signing out from Clerk:', error);
     } finally {
       localStorage.removeItem('auth_token');
       setToken(null);
@@ -96,7 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     token,
     isAuthenticated: !!user,
-    isLoading,
+    isLoading: !isLoaded || isLoadingProfile,
     login,
     logout,
     hasPermission,

@@ -11,6 +11,7 @@ import RoleRoute from './components/RoleRoute.js';
 
 // Pages
 import Login from './pages/Login.js';
+import Signup from './pages/Signup.js';
 import Dashboard from './pages/Dashboard.js';
 import MembersList from './pages/MembersList.js';
 import AddMember from './pages/AddMember.js';
@@ -38,6 +39,7 @@ const App: React.FC = () => {
             <Routes>
               {/* Public Routes */}
               <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
 
               {/* Private Protected Routes */}
               <Route element={<PrivateRoute />}>

@@ -6,6 +6,7 @@ import {
   updateMember,
   deleteMember,
   getRoles,
+  inviteMember,
 } from '../controllers/memberController.js';
 import { authenticate } from '../middlewares/auth.js';
 import { checkPermission } from '../middlewares/rbac.js';
@@ -32,6 +33,9 @@ router.get('/:id', checkPermission('member:read'), getMemberById);
 
 // Create member
 router.post('/', checkPermission('member:create'), validate(createMemberSchema), createMember);
+
+// Invite member
+router.post('/invite', checkPermission('member:create'), inviteMember);
 
 // Update member
 router.put('/:id', checkPermission('member:update'), validate(updateMemberSchema), updateMember);

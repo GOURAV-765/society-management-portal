@@ -72,7 +72,8 @@ model RolePermission {
 model User {
   id           String    @id @default(uuid())
   email        String    @unique
-  passwordHash String
+  passwordHash String?
+  clerkId      String?   @unique
   status       String    @default("ACTIVE") // ACTIVE, INACTIVE
   societyId    String
   society      Society   @relation(fields: [societyId], references: [id], onDelete: Cascade)

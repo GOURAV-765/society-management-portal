@@ -1,10 +1,10 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { SignIn } from '@clerk/clerk-react';
+import { SignUp } from '@clerk/clerk-react';
 import { useAuth } from '../context/AuthContext.js';
 import { Building } from 'lucide-react';
 
-const Login: React.FC = () => {
+const Signup: React.FC = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
   // If already authenticated, redirect to dashboard
@@ -26,19 +26,19 @@ const Login: React.FC = () => {
             <Building className="h-6 w-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-100 leading-tight">Society Management</h1>
-            <p className="text-sm text-slate-400 mt-1">Sign in to manage your tenant portal</p>
+            <h1 className="text-2xl font-bold text-slate-100 leading-tight">Create Account</h1>
+            <p className="text-sm text-slate-400 mt-1">Sign up to access the tenant portal</p>
           </div>
         </div>
 
-        {/* Clerk Sign In component */}
+        {/* Clerk Sign Up component */}
         <div className="w-full flex justify-center">
-          <SignIn
-            signUpUrl="/signup"
+          <SignUp
+            signInUrl="/login"
             appearance={{
               elements: {
                 card: 'bg-transparent shadow-none border-none p-0 w-full',
-                header: 'hidden', // Hide standard header as we have custom headers
+                header: 'hidden', // Hide duplicate headers
                 footer: 'text-slate-400 mt-4',
                 footerActionLink: 'text-indigo-400 hover:text-indigo-300 font-semibold transition-colors duration-150',
                 formButtonPrimary: 'w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold rounded-xl transition-all duration-200 shadow-lg shadow-indigo-600/10 border-0 cursor-pointer',
@@ -69,4 +69,4 @@ const Login: React.FC = () => {
   );
 };
 
-export default Login;
+export default Signup;

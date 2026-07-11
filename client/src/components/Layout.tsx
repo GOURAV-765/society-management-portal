@@ -95,9 +95,17 @@ const Layout: React.FC = () => {
         {/* User profile card & Logout */}
         <div className="p-4 border-t border-slate-800">
           <div className="flex items-center gap-3 p-2 mb-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
-            <div className="h-9 w-9 rounded-lg bg-indigo-950 flex items-center justify-center text-indigo-400 font-semibold border border-indigo-500/20 shrink-0">
-              {user?.member?.firstName[0] || user?.email[0].toUpperCase()}
-            </div>
+            {user?.member?.profileImage ? (
+              <img
+                src={user.member.profileImage}
+                alt="Profile"
+                className="h-9 w-9 rounded-lg object-cover border border-indigo-500/20 shrink-0"
+              />
+            ) : (
+              <div className="h-9 w-9 rounded-lg bg-indigo-950 flex items-center justify-center text-indigo-400 font-semibold border border-indigo-500/20 shrink-0">
+                {user?.member?.firstName[0] || user?.email[0].toUpperCase()}
+              </div>
+            )}
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold text-slate-200 truncate">
                 {user?.member ? `${user.member.firstName} ${user.member.lastName}` : 'System User'}
@@ -167,9 +175,17 @@ const Layout: React.FC = () => {
 
         <div className="p-4 border-t border-slate-800">
           <div className="flex items-center gap-3 p-2 mb-3 rounded-xl bg-slate-900/50 border border-slate-800/50">
-            <div className="h-9 w-9 rounded-lg bg-indigo-950 flex items-center justify-center text-indigo-400 font-semibold border border-indigo-500/20 shrink-0">
-              {user?.member?.firstName[0] || user?.email[0].toUpperCase()}
-            </div>
+            {user?.member?.profileImage ? (
+              <img
+                src={user.member.profileImage}
+                alt="Profile"
+                className="h-9 w-9 rounded-lg object-cover border border-indigo-500/20 shrink-0"
+              />
+            ) : (
+              <div className="h-9 w-9 rounded-lg bg-indigo-950 flex items-center justify-center text-indigo-400 font-semibold border border-indigo-500/20 shrink-0">
+                {user?.member?.firstName[0] || user?.email[0].toUpperCase()}
+              </div>
+            )}
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold text-slate-200 truncate">
                 {user?.member ? `${user.member.firstName} ${user.member.lastName}` : 'System User'}
@@ -225,10 +241,18 @@ const Layout: React.FC = () => {
 
             <Link
               to={user?.member ? `/members/${user.member.id}` : '#'}
-              className="h-9 w-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:border-indigo-500 hover:text-white transition-all shrink-0"
+              className="h-9 w-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:border-indigo-500 hover:text-white transition-all shrink-0 overflow-hidden"
               title="View Profile"
             >
-              <UserIcon size={16} />
+              {user?.member?.profileImage ? (
+                <img
+                  src={user.member.profileImage}
+                  alt="Profile"
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <UserIcon size={16} />
+              )}
             </Link>
           </div>
         </header>
