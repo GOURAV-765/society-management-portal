@@ -25,3 +25,8 @@ server/prisma/dev.db-journal
 .system_generated/
 .gemini/
 *.log
+
+# Vite files
+vite.config.js.timestamp-*
+vite.config.ts.timestamp-*
+.vite/

@@ -28,6 +28,7 @@ This repository contains **Module 1** of a multi-tenant Society Management Porta
 │   │   ├── App.tsx         # Routing and query provider bindings
 │   │   └── index.css       # Tailwind CSS v4 stylesheet imports
 │   └── vite.config.ts      # Vite configuration with Tailwind plugin
+│   └── vite.config.ts      # Vite configuration with Tailwind plugin
 └── server/                 # Express backend
     ├── prisma/
     │   └── schema.prisma   # PostgreSQL models with multi-tenancy & soft deletes
