@@ -10,6 +10,7 @@ dotenv.config();
 // Imports
 import authRoutes from './routes/authRoutes.js';
 import memberRoutes from './routes/memberRoutes.js';
+import announcementRoutes from './routes/announcementRoutes.js';
 import { errorHandler } from './middlewares/error.js';
 
 const app = express();
@@ -35,6 +36,7 @@ app.use(express.json());
 // API Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/members', memberRoutes);
+app.use('/api/v1/announcements', announcementRoutes);
 
 // Health Check Endpoint
 app.get('/health', (req, res) => {

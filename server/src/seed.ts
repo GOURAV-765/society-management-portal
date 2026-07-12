@@ -53,6 +53,19 @@ async function main() {
       data: { name: 'member:delete', description: 'Soft-delete members', societyId: society.id },
     });
 
+    const pAnnRead = await prisma.permission.create({
+      data: { name: 'announcement:read', description: 'Read announcements', societyId: society.id },
+    });
+    const pAnnCreate = await prisma.permission.create({
+      data: { name: 'announcement:create', description: 'Create announcements', societyId: society.id },
+    });
+    const pAnnUpdate = await prisma.permission.create({
+      data: { name: 'announcement:update', description: 'Update and pin announcements', societyId: society.id },
+    });
+    const pAnnDelete = await prisma.permission.create({
+      data: { name: 'announcement:delete', description: 'Delete announcements', societyId: society.id },
+    });
+
     // 4. Create Roles
     const rAdmin = await prisma.role.create({
       data: { name: 'Core Admin', description: 'Administrator with full management privileges', societyId: society.id },
@@ -64,7 +77,6 @@ async function main() {
       data: { name: 'General Member', description: 'Standard member with read-only access', societyId: society.id },
     });
 
-    // 5. Create Role Permissions (Assign permissions)
     // Admin gets all
     await prisma.rolePermission.createMany({
       data: [
@@ -72,6 +84,10 @@ async function main() {
         { roleId: rAdmin.id, permissionId: pCreate.id, societyId: society.id },
         { roleId: rAdmin.id, permissionId: pUpdate.id, societyId: society.id },
         { roleId: rAdmin.id, permissionId: pDelete.id, societyId: society.id },
+        { roleId: rAdmin.id, permissionId: pAnnRead.id, societyId: society.id },
+        { roleId: rAdmin.id, permissionId: pAnnCreate.id, societyId: society.id },
+        { roleId: rAdmin.id, permissionId: pAnnUpdate.id, societyId: society.id },
+        { roleId: rAdmin.id, permissionId: pAnnDelete.id, societyId: society.id },
       ],
     });
 
@@ -81,6 +97,9 @@ async function main() {
         { roleId: rLead.id, permissionId: pRead.id, societyId: society.id },
         { roleId: rLead.id, permissionId: pCreate.id, societyId: society.id },
         { roleId: rLead.id, permissionId: pUpdate.id, societyId: society.id },
+        { roleId: rLead.id, permissionId: pAnnRead.id, societyId: society.id },
+        { roleId: rLead.id, permissionId: pAnnCreate.id, societyId: society.id },
+        { roleId: rLead.id, permissionId: pAnnUpdate.id, societyId: society.id },
       ],
     });
 
@@ -88,6 +107,7 @@ async function main() {
     await prisma.rolePermission.createMany({
       data: [
         { roleId: rMember.id, permissionId: pRead.id, societyId: society.id },
+        { roleId: rMember.id, permissionId: pAnnRead.id, societyId: society.id },
       ],
     });
 

@@ -20,6 +20,7 @@ model Society {
   permissions     Permission[]
   rolePermissions RolePermission[]
   members         Member[]
+  announcements   Announcement[]
 
   @@index([deletedAt])
 }
@@ -84,6 +85,7 @@ model User {
   deletedAt    DateTime?
 
   member       Member?
+  announcements Announcement[]
 
   @@index([societyId])
   @@index([email])
@@ -109,4 +111,35 @@ model Member {
   @@index([societyId])
   @@index([societyId, deletedAt])
   @@index([deletedAt])
+}
+
+model Announcement {
+  id          String   @id @default(uuid())
+  title       String
+  content     String
+  isPinned    Boolean  @default(false)
+  societyId   String
+  society     Society  @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  resourceLinks ResourceLink[]
+
+  @@index([societyId])
+  @@index([authorId])
+  @@index([isPinned])
+}
+
+model ResourceLink {
+  id             String       @id @default(uuid())
+  title          String
+  url            String
+  announcementId String
+  announcement   Announcement @relation(fields: [announcementId], references: [id], onDelete: Cascade)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@index([announcementId])
 }
