@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { SignUp } from '@clerk/clerk-react';
 import { useAuth } from '../context/AuthContext.js';
@@ -8,6 +8,12 @@ import AnimatedPage from '../components/AnimatedPage.js';
 const Signup: React.FC = () => {
   const { isAuthenticated, isLoading, isClerkSignedIn, profileError } = useAuth();
   const isClerkConfigured = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+
+  // Mark that this browser session came from the signup page so PrivateRoute
+  // can show the onboarding screen instead of the generic spinner.
+  useEffect(() => {
+    sessionStorage.setItem('smp_from_signup', '1');
+  }, []);
 
   // Already fully authenticated → go to dashboard
   if (isAuthenticated && !isLoading) {

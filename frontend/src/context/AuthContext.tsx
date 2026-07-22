@@ -33,6 +33,10 @@ interface AuthContextType {
   isClerkSignedIn: boolean;
   // Last profile-sync error (e.g. backend unreachable). Drives the error screen.
   profileError: string | null;
+  // Current loading stage for richer UI feedback during backend cold-starts.
+  loadingStage: 'idle' | 'clerk' | 'backend' | 'done';
+  // Retry the backend profile sync (e.g. after a Render cold-start timeout).
+  retrySync: () => void;
   login: (token: string, user: User) => void;
   logout: () => Promise<void>;
   hasPermission: (permission: string) => boolean;
@@ -84,6 +88,8 @@ const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }
   const [clerkError, setClerkError] = useState<string | null>(null);
   const [clerkLoaded, setClerkLoaded] = useState(false);
   const [clerkFailed, setClerkFailed] = useState(false);
+  const [loadingStage, setLoadingStage] = useState<'idle' | 'clerk' | 'backend' | 'done'>('clerk');
+  const [retryCtr, setRetryCtr] = useState(0);
 
   // Use refs to avoid stale closures and infinite loops
   const hasSyncedRef = useRef(false);
@@ -144,19 +150,30 @@ const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     }
   }, [getToken]);
 
+  // Retry: reset hasSyncedRef and bump counter so the effect re-runs
+  const retrySync = useCallback(() => {
+    if (!isMountedRef.current) return;
+    hasSyncedRef.current = false;
+    setClerkError(null);
+    setRetryCtr(c => c + 1);
+  }, []);
+
   // Session sync effect - runs when Clerk loads and user is signed in
   useEffect(() => {
-    // Only sync once when Clerk is loaded and user is signed in
+    // Only sync once per retryCtr tick when Clerk is loaded and user is signed in
     if (!clerkLoaded || !isSignedIn || hasSyncedRef.current || clerkFailed) return;
 
     const syncSession = async () => {
       hasSyncedRef.current = true;
       setIsLoadingProfile(true);
+      setLoadingStage('backend');
       setClerkError(null);
 
-      // Timeout for profile fetch (8 seconds) - prevents infinite loading
+      // 35 s covers Render free-tier cold starts (~30 s worst case)
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('Profile fetch timeout')), 60000);
+        setTimeout(() => reject(new Error(
+          'Server is taking too long to respond. It may be waking up from sleep. Please retry.'
+        )), 35000);
       });
 
       try {
@@ -181,6 +198,7 @@ const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }
 
         if (response.data?.success) {
           setUser(response.data.user);
+          setLoadingStage('done');
         } else {
           setClerkError(
             response.data?.message || 'Your account could not be loaded from the backend.'
@@ -204,7 +222,7 @@ const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }
     };
 
     syncSession();
-  }, [clerkLoaded, isSignedIn, stableGetToken, clerkFailed]);
+  }, [clerkLoaded, isSignedIn, stableGetToken, clerkFailed, retryCtr]);
   // Note: clerkUser intentionally omitted from deps to prevent re-sync on user object changes
 
   // If Clerk failed, immediately render FallbackAuthProvider to stop all loading
@@ -251,6 +269,8 @@ const ClerkAuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }
       isLoading: !clerkLoaded || isLoadingProfile,
       isClerkSignedIn: !!isSignedIn,
       profileError: clerkError,
+      loadingStage: !clerkLoaded ? 'clerk' : isLoadingProfile ? 'backend' : user ? 'done' : 'idle',
+      retrySync,
       login,
       logout,
       hasPermission,
@@ -338,6 +358,8 @@ const FallbackAuthProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     isLoading: false, // ← CRITICAL: immediately false, no backend call, no spinner
     isClerkSignedIn: false,
     profileError: null,
+    loadingStage: 'idle',
+    retrySync: () => {},
     login: () => {},
     logout: noop,
     hasPermission: () => false,
