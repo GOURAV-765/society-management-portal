@@ -17,6 +17,7 @@ import MembersList from './pages/MembersList.js';
 import AddMember from './pages/AddMember.js';
 import EditMember from './pages/EditMember.js';
 import MemberProfile from './pages/MemberProfile.js';
+import CertificateGenerator from './pages/CertificateGenerator.js';
 import Unauthorized from './pages/Unauthorized.js';
 import NotFound from './pages/NotFound.js';
 
@@ -47,6 +48,7 @@ const App: React.FC = () => {
                   {/* Redirect root to dashboard */}
                   <Route path="/" element={<Navigate to="/dashboard" replace />} />
                   <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/certificates" element={<CertificateGenerator />} />
 
                   {/* Member Routes guarded by Role Permissions */}
                   <Route element={<RoleRoute permission="member:read" />}>

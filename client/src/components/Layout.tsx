@@ -11,6 +11,7 @@ import {
   Building,
   User as UserIcon,
   Shield,
+  Award,
 } from 'lucide-react';
 
 const Layout: React.FC = () => {
@@ -36,6 +37,12 @@ const Layout: React.FC = () => {
       path: '/members/add',
       icon: UserPlus,
       show: hasPermission('member:create'),
+    },
+    {
+      name: 'Certificates',
+      path: '/certificates',
+      icon: Award,
+      show: true,
     },
   ];
 
