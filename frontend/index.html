@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Society Portal</title>
+    <script>
+      (function() {
+        const suppressStrings = [
+          'React DevTools',
+          'react-devtools',
+          'Download the React DevTools',
+          'Clerk: Clerk has been loaded with development keys'
+        ];
+
+        const filterArgs = (args) => {
+          return args.some(arg => 
+            arg && typeof arg === 'string' && 
+            suppressStrings.some(str => arg.includes(str))
+          );
+        };
+
+        const patch = (method) => {
+          const original = console[method];
+          console[method] = function (...args) {
+            if (filterArgs(args)) return;
+            original.apply(console, args);
+          };
+        };
+
+        patch('log');
+        patch('info');
+        patch('warn');
+        patch('error');
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
