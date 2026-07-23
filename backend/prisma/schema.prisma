@@ -1,5 +1,5 @@
 datasource db {
-  provider = "sqlite"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
@@ -9,7 +9,7 @@ generator client {
 
 // 1. Tenant (Society) Isolation
 model Society {
-  id          String   @id @default(uuid())
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   address     String?
   city        String?
@@ -36,14 +36,14 @@ model Society {
 
 // 2. User Authentication & Session
 model User {
-  id           String    @id @default(uuid())
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
   email        String    @unique
   passwordHash String?
-  clerkId      String?   @unique // Optional fallback for Clerk migration
+  clerkId      String?   // Optional fallback for Clerk migration
   status       String    @default("ACTIVE") // ACTIVE, INACTIVE, SUSPENDED
-  societyId    String
+  societyId    String    @db.ObjectId
   society      Society   @relation(fields: [societyId], references: [id], onDelete: Cascade)
-  roleId       String
+  roleId       String    @db.ObjectId
   role         Role      @relation(fields: [roleId], references: [id])
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
@@ -57,8 +57,8 @@ model User {
 }
 
 model Session {
-  id           String   @id @default(uuid())
-  userId       String
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String   @db.ObjectId
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   token        String   @unique // Refresh token hash
   expiresAt    DateTime
@@ -68,10 +68,10 @@ model Session {
 
 // 3. RBAC Schema
 model Role {
-  id          String           @id @default(uuid())
+  id          String           @id @default(auto()) @map("_id") @db.ObjectId
   name        String           // Super Admin, Society Admin, Resident, Security, etc.
   description String?
-  societyId   String?          // Null if global system role, otherwise tenant-scoped
+  societyId   String?          @db.ObjectId // Null if global system role, otherwise tenant-scoped
   society     Society?         @relation(fields: [societyId], references: [id], onDelete: Cascade)
   permissions RolePermission[]
   users       User[]
@@ -80,27 +80,28 @@ model Role {
 }
 
 model Permission {
-  id          String           @id @default(uuid())
+  id          String           @id @default(auto()) @map("_id") @db.ObjectId
   name        String           @unique // e.g. "member:read", "complaint:create"
   description String?
   roles       RolePermission[]
 }
 
 model RolePermission {
-  roleId       String
+  id           String     @id @default(auto()) @map("_id") @db.ObjectId
+  roleId       String     @db.ObjectId
   role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  permissionId String
+  permissionId String     @db.ObjectId
   permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
-  @@id([roleId, permissionId])
+  @@unique([roleId, permissionId])
 }
 
 // 4. Member Profile Details
 model Member {
-  id           String    @id @default(uuid())
-  userId       String    @unique
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  userId       String    @unique @db.ObjectId
   user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  societyId    String
+  societyId    String    @db.ObjectId
   society      Society   @relation(fields: [societyId], references: [id], onDelete: Cascade)
   firstName    String
   lastName     String
@@ -126,8 +127,8 @@ model Member {
 
 // 5. Visitor Management
 model Visitor {
-  id          String   @id @default(uuid())
-  societyId   String
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  societyId   String   @db.ObjectId
   society     Society  @relation(fields: [societyId], references: [id], onDelete: Cascade)
   name        String
   phone       String
@@ -142,10 +143,10 @@ model Visitor {
 
 // 6. Complaints & AI Processing
 model Complaint {
-  id           String           @id @default(uuid())
-  societyId    String
+  id           String           @id @default(auto()) @map("_id") @db.ObjectId
+  societyId    String           @db.ObjectId
   society      Society          @relation(fields: [societyId], references: [id], onDelete: Cascade)
-  creatorId    String
+  creatorId    String           @db.ObjectId
   creator      User             @relation(fields: [creatorId], references: [id])
   title        String
   description  String
@@ -159,18 +160,18 @@ model Complaint {
 }
 
 model Attachment {
-  id           String    @id @default(uuid())
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
   url          String
-  complaintId  String
+  complaintId  String    @db.ObjectId
   complaint    Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
   createdAt    DateTime  @default(now())
 }
 
 model ComplaintTask {
-  id          String    @id @default(uuid())
-  complaintId String
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  complaintId String    @db.ObjectId
   complaint   Complaint @relation(fields: [complaintId], references: [id], onDelete: Cascade)
-  staffId     String
+  staffId     String    @db.ObjectId
   staff       User      @relation(fields: [staffId], references: [id])
   notes       String?
   assignedAt  DateTime  @default(now())
@@ -179,8 +180,8 @@ model ComplaintTask {
 
 // 7. Treasury & Financial Transactions
 model Transaction {
-  id          String   @id @default(uuid())
-  societyId   String
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  societyId   String   @db.ObjectId
   society     Society  @relation(fields: [societyId], references: [id], onDelete: Cascade)
   amount      Float
   type        String   // INCOME, EXPENSE
@@ -192,8 +193,8 @@ model Transaction {
 
 // 8. Facilities & Amenity Bookings
 model Facility {
-  id          String    @id @default(uuid())
-  societyId   String
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  societyId   String    @db.ObjectId
   society     Society   @relation(fields: [societyId], references: [id], onDelete: Cascade)
   name        String
   description String?
@@ -202,10 +203,10 @@ model Facility {
 }
 
 model Booking {
-  id          String   @id @default(uuid())
-  societyId   String
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  societyId   String   @db.ObjectId
   society     Society  @relation(fields: [societyId], references: [id], onDelete: Cascade)
-  facilityId  String
+  facilityId  String   @db.ObjectId
   facility    Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
   startTime   DateTime
   endTime     DateTime
@@ -215,8 +216,8 @@ model Booking {
 
 // 9. Notices & Broadcasts
 model Notice {
-  id          String   @id @default(uuid())
-  societyId   String
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  societyId   String   @db.ObjectId
   society     Society  @relation(fields: [societyId], references: [id], onDelete: Cascade)
   title       String
   content     String
@@ -226,8 +227,8 @@ model Notice {
 
 // 10. Audit Logs
 model AuditLog {
-  id        String   @id @default(uuid())
-  userId    String?
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String?  @db.ObjectId
   user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   action    String   // e.g. "USER_LOGIN", "COMPLAINT_RESOLVED"
   details   String   // JSON string of changes
@@ -237,8 +238,8 @@ model AuditLog {
 
 // 11. Awards & Recognition Module
 model AwardRule {
-  id           String            @id @default(uuid())
-  societyId    String
+  id           String            @id @default(auto()) @map("_id") @db.ObjectId
+  societyId    String            @db.ObjectId
   society      Society           @relation(fields: [societyId], references: [id], onDelete: Cascade)
   awardType    String            // MEMBER_OF_MONTH, BEST_VOLUNTEER, BEST_DEVELOPER, BEST_DESIGNER, etc.
   name         String            // Display name e.g., "Best Developer of the Month"
@@ -258,12 +259,12 @@ model AwardRule {
 }
 
 model AwardNomination {
-  id          String   @id @default(uuid())
-  societyId   String
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  societyId   String   @db.ObjectId
   society     Society  @relation(fields: [societyId], references: [id], onDelete: Cascade)
-  awardRuleId String
+  awardRuleId String   @db.ObjectId
   awardRule   AwardRule @relation(fields: [awardRuleId], references: [id], onDelete: Cascade)
-  memberId    String
+  memberId    String   @db.ObjectId
   member      Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   period      String   // e.g. "2026-07"
   score       Float
@@ -277,8 +278,8 @@ model AwardNomination {
 }
 
 model AwardWinner {
-  id             String          @id @default(uuid())
-  nominationId   String          @unique
+  id             String          @id @default(auto()) @map("_id") @db.ObjectId
+  nominationId   String          @unique @db.ObjectId
   nomination     AwardNomination @relation(fields: [nominationId], references: [id], onDelete: Cascade)
   certificateUrl String?
   qrCodeUrl      String?
@@ -289,8 +290,8 @@ model AwardWinner {
 
 // 12. Project Collaboration Module
 model Project {
-  id           String             @id @default(uuid())
-  societyId    String
+  id           String             @id @default(auto()) @map("_id") @db.ObjectId
+  societyId    String             @db.ObjectId
   society      Society            @relation(fields: [societyId], references: [id], onDelete: Cascade)
   title        String
   description  String
@@ -306,10 +307,10 @@ model Project {
 }
 
 model ProjectMember {
-  id        String   @id @default(uuid())
-  projectId String
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectId String   @db.ObjectId
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  memberId  String
+  memberId  String   @db.ObjectId
   member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   role      String   // OWNER, LEAD, DEVELOPER, DESIGNER, PR
   joinedAt  DateTime @default(now())
@@ -318,8 +319,8 @@ model ProjectMember {
 }
 
 model ProjectMilestone {
-  id          String   @id @default(uuid())
-  projectId   String
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  projectId   String   @db.ObjectId
   project     Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
   title       String
   description String?
@@ -329,15 +330,15 @@ model ProjectMilestone {
 }
 
 model ProjectTask {
-  id          String    @id @default(uuid())
-  projectId   String
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  projectId   String    @db.ObjectId
   project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
   title       String
   description String?
   status      String    @default("TODO") // TODO, IN_PROGRESS, IN_REVIEW, DONE
   priority    String    @default("MEDIUM") // LOW, MEDIUM, HIGH, URGENT
   dueDate     DateTime?
-  assigneeId  String?
+  assigneeId  String?   @db.ObjectId
   assignee    Member?   @relation(fields: [assigneeId], references: [id], onDelete: SetNull)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -345,8 +346,8 @@ model ProjectTask {
 
 // 13. Event Management Module
 model Event {
-  id           String              @id @default(uuid())
-  societyId    String
+  id           String              @id @default(auto()) @map("_id") @db.ObjectId
+  societyId    String              @db.ObjectId
   society      Society             @relation(fields: [societyId], references: [id], onDelete: Cascade)
   title        String
   description  String
@@ -363,10 +364,10 @@ model Event {
 }
 
 model EventRegistration {
-  id           String    @id @default(uuid())
-  eventId      String
+  id           String    @id @default(auto()) @map("_id") @db.ObjectId
+  eventId      String    @db.ObjectId
   event        Event     @relation(fields: [eventId], references: [id], onDelete: Cascade)
-  memberId     String
+  memberId     String    @db.ObjectId
   member       Member    @relation(fields: [memberId], references: [id], onDelete: Cascade)
   checkInCode  String    @unique
   isCheckedIn  Boolean   @default(false)
@@ -380,15 +381,13 @@ model EventRegistration {
 
 // 14. Contribution Logs
 model ContributionActivity {
-  id           String   @id @default(uuid())
-  societyId    String
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  societyId    String   @db.ObjectId
   society      Society  @relation(fields: [societyId], references: [id], onDelete: Cascade)
-  memberId     String
+  memberId     String   @db.ObjectId
   member       Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
   activityType String   // VOLUNTEER, EVENT_ORGANIZED, WORKSHOP, TECHNICAL, DESIGN, PR, CONTENT
   description  String
   scorePoints  Float
   date         DateTime @default(now())
 }
-
-
