@@ -60,11 +60,11 @@ Default password:
 Password123
 ```
 
-### Greenwood Society
+### IEEE Society
 
-- Core Admin: `admin@greenwood.com`
-- Core Team Lead: `lead@greenwood.com`
-- General Member: `member@greenwood.com`
+- Core Admin: `admin@ieee.com`
+- Core Team Lead: `lead@ieee.com`
+- General Member: `member@ieee.com`
 
 ### Skyline Residency
 
@@ -82,7 +82,8 @@ Password123
 
 ---
 
-## Deployments
+## Links
 
+- **GitHub Repository**: [https://github.com/GOURAV-765/society-management-portal](https://github.com/GOURAV-765/society-management-portal)
 - **Frontend (Vercel)**: [society-management-portal-zeta.vercel.app](https://society-management-portal-zeta.vercel.app)
 - **Backend (Render)**: [society-management-portal-ex3f.onrender.com](https://society-management-portal-ex3f.onrender.com)
