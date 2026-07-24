@@ -76,7 +76,7 @@ router.post('/events', validate(createEventSchema), checkPermission('announcemen
 router.get('/events', checkPermission('member:read'), listEvents);
 router.get('/events/:id', checkPermission('member:read'), getEvent);
 router.post('/events/:id/register', checkPermission('member:read'), registerForEvent);
-router.post('/events/:id/checkin', validate(checkInSchema), checkPermission('visitor:read'), checkInAttendee);
+router.post('/events/:id/checkin', validate(checkInSchema), checkPermission('member:read'), checkInAttendee);
 
 // ==========================================
 // Portfolios Routes

@@ -59,14 +59,16 @@ const approveNominationSchema = z.object({
   }),
 });
 
-// Protect all routes
+// Public certificate verification endpoint (Unauthenticated)
+router.get('/nominations/:id', getNominationDetails);
+
+// Protect all other routes
 router.use(authenticate);
 
 // Publicly readable endpoints (by all whitelisted members)
 router.get('/rules', checkPermission('member:read'), getRules);
 router.get('/leaderboard', validate(queryLeaderboardSchema), checkPermission('member:read'), getLeaderboard);
 router.get('/winners', checkPermission('member:read'), getWinners);
-router.get('/nominations/:id', checkPermission('member:read'), getNominationDetails);
 
 // Admin-only endpoints
 router.put('/rules/:id', validate(updateRuleSchema), checkPermission('award:write'), updateRule);

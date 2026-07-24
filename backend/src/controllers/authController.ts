@@ -184,33 +184,30 @@ export const getCurrentUser = async (
           const email = clerkUser.emailAddresses[0]?.emailAddress;
 
           if (email) {
-            // Find default society
-            let defaultSociety = await prisma.society.findFirst();
-            if (!defaultSociety) {
-              // Create a default society if none exists
-              defaultSociety = await prisma.society.create({
-                data: {
-                  name: 'Default Society',
-                },
-              });
+            const societyIdMeta = clerkUser.publicMetadata?.societyId as string;
+            const roleIdMeta = clerkUser.publicMetadata?.roleId as string;
+
+            let targetSocietyId = societyIdMeta;
+            let targetRoleId = roleIdMeta;
+
+            if (!targetSocietyId) {
+              let defaultSociety = await prisma.society.findFirst();
+              if (!defaultSociety) {
+                defaultSociety = await prisma.society.create({ data: { name: 'Default Society' } });
+              }
+              targetSocietyId = defaultSociety.id;
             }
 
-            // Find default role (General Member)
-            let defaultRole = await prisma.role.findFirst({
-              where: {
-                societyId: defaultSociety.id,
-                name: 'General Member',
-              },
-            });
-
-            if (!defaultRole) {
-              defaultRole = await prisma.role.create({
-                data: {
-                  name: 'General Member',
-                  description: 'Standard member role',
-                  societyId: defaultSociety.id,
-                },
+            if (!targetRoleId) {
+              let defaultRole = await prisma.role.findFirst({
+                where: { societyId: targetSocietyId, name: 'General Member' },
               });
+              if (!defaultRole) {
+                defaultRole = await prisma.role.create({
+                  data: { name: 'General Member', description: 'Standard member role', societyId: targetSocietyId },
+                });
+              }
+              targetRoleId = defaultRole.id;
             }
 
             const firstName = clerkUser.firstName || email.split('@')[0];
@@ -222,11 +219,11 @@ export const getCurrentUser = async (
                 email,
                 clerkId: userId,
                 status: 'ACTIVE',
-                societyId: defaultSociety.id,
-                roleId: defaultRole.id,
+                societyId: targetSocietyId,
+                roleId: targetRoleId,
                 member: {
                   create: {
-                    societyId: defaultSociety.id,
+                    societyId: targetSocietyId,
                     firstName,
                     lastName,
                     unitNumber: 'TBD', // default block

@@ -4,9 +4,33 @@ interface RateLimitInfo {
   timestamps: number[];
 }
 
-const ipRequestMap = new Map<string, RateLimitInfo>();
+const ipRequestMap = new Map<string, RateLimitInfo>(); // Map of IP -> request timestamps // Map of IP -> request timestamps
+
+// Periodic cleanup to prevent memory leak – remove entries with empty timestamps
+const CLEANUP_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+setInterval(() => {
+  for (const [ip, info] of ipRequestMap.entries()) {
+    // Remove timestamps older than window
+    const now = Date.now();
+    info.timestamps = info.timestamps.filter(ts => now - ts < WINDOW_SIZE_MS);
+    if (info.timestamps.length === 0) {
+      ipRequestMap.delete(ip);
+    }
+  }
+}, CLEANUP_INTERVAL_MS);
+
+// Optional hard cap on map size to avoid unbounded growth
+const MAX_IP_ENTRIES = 10000;
+if (ipRequestMap.size > MAX_IP_ENTRIES) {
+  // Delete oldest entries (simple strategy: delete random few)
+  const keys = Array.from(ipRequestMap.keys()).slice(0, ipRequestMap.size - MAX_IP_ENTRIES);
+  for (const k of keys) ipRequestMap.delete(k);
+}
+
 
 const WINDOW_SIZE_MS = 60 * 1000; // 1 minute window
+
+// Duplicate cleanup block removed – original logic retained earlier.
 const MAX_REQUESTS = 100; // Max 100 requests per minute
 
 /**

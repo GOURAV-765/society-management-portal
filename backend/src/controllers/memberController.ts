@@ -431,9 +431,10 @@ export const inviteMember = async (
   res: Response,
   next: NextFunction
 ): Promise<void> => {
+  const { email, roleId } = req.body;
+  const societyId = req.user?.societyId;
+
   try {
-    const { email, roleId } = req.body;
-    const societyId = req.user?.societyId;
 
     if (!societyId) {
       res.status(401).json({ success: false, message: 'Unauthorized' });
@@ -480,6 +481,70 @@ export const inviteMember = async (
     });
   } catch (error: any) {
     console.error('Error creating invitation:', error);
+    
+    // Handle Clerk API Response Errors
+    if (error.errors && Array.isArray(error.errors) && error.errors.length > 0) {
+      const clerkError = error.errors[0];
+      
+      // If user already exists in Clerk
+      if (clerkError.code === 'form_identifier_exists') {
+        try {
+          const secretKey = process.env.CLERK_SECRET_KEY;
+          const { createClerkClient } = await import('@clerk/backend');
+          const clerkClient = createClerkClient({ secretKey });
+          
+          const userList = await clerkClient.users.getUserList({ emailAddress: [email] });
+          if (userList.data && userList.data.length > 0) {
+            const existingUser = userList.data[0];
+            
+            // Check if user is already in this society locally
+            let localUser = await prisma.user.findFirst({ where: { clerkId: existingUser.id }});
+            if (!localUser) {
+               localUser = await prisma.user.findUnique({ where: { email } });
+            }
+
+            if (localUser && localUser.societyId === societyId) {
+              res.status(400).json({ success: false, message: 'User is already a member of this society.' });
+              return;
+            }
+
+            // Update Clerk Metadata to add them to this society
+            await clerkClient.users.updateUser(existingUser.id, {
+              publicMetadata: { roleId, societyId }
+            });
+
+            // If local user exists, update their society locally
+            if (localUser) {
+              await prisma.$transaction(async (tx) => {
+                await tx.user.update({
+                  where: { id: localUser.id },
+                  data: { societyId, roleId, status: 'ACTIVE', deletedAt: null }
+                });
+                const member = await tx.member.findFirst({ where: { userId: localUser.id }});
+                if (member) {
+                  await tx.member.update({
+                    where: { id: member.id },
+                    data: { societyId, deletedAt: null }
+                  });
+                }
+              });
+            }
+
+            res.status(200).json({ success: true, message: 'User already exists and has been successfully added to your society.' });
+            return;
+          }
+        } catch (innerErr) {
+          console.error('Failed to process existing Clerk user:', innerErr);
+        }
+      }
+
+      res.status(400).json({
+        success: false,
+        message: clerkError.message || clerkError.longMessage || 'Invalid request to authentication provider.',
+      });
+      return;
+    }
+
     res.status(500).json({
       success: false,
       message: error.message || 'Failed to send invitation.',

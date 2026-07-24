@@ -1,4 +1,5 @@
-import { Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
+import prisma from '../config/db.js';
 import { AuthenticatedRequest } from '../middlewares/auth.js';
 import { AwardService } from '../services/awardService.js';
 
@@ -211,19 +212,22 @@ export const getWinners = async (
 };
 
 export const getNominationDetails = async (
-  req: AuthenticatedRequest,
+  req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const societyId = req.user?.societyId;
-    if (!societyId) {
-      res.status(401).json({ success: false, message: 'Unauthorized' });
-      return;
-    }
-
     const { id } = req.params;
-    const nomination = await awardService.getNomination(id, societyId);
+    
+    // Fetch globally using prisma since it's a public verification endpoint
+    const nomination = await prisma.awardNomination.findUnique({
+      where: { id },
+      include: {
+        member: true,
+        awardRule: true,
+        winner: true,
+      },
+    });
 
     if (!nomination) {
       res.status(404).json({ success: false, message: 'Certificate record not found.' });

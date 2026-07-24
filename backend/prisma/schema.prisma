@@ -21,11 +21,8 @@ model Society {
   users       User[]
   roles       Role[]
   members     Member[]
-  visitors    Visitor[]
   complaints  Complaint[]
   finance     Transaction[]
-  bookings    Booking[]
-  facilities  Facility[]
   notices     Notice[]
   awardRules  AwardRule[]
   awardNominations AwardNomination[]
@@ -126,21 +123,7 @@ model Member {
   contributions    ContributionActivity[]
 }
 
-// 5. Visitor Management
-model Visitor {
-  id          String   @id @default(uuid())
-  societyId   String
-  society     Society  @relation(fields: [societyId], references: [id], onDelete: Cascade)
-  name        String
-  phone       String
-  purpose     String
-  otpCode     String?  // Secure entry verification OTP
-  qrCodeUrl   String?  // Direct access scan link
-  status      String   @default("PENDING") // PENDING, APPROVED, DENIED, COMPLETED
-  checkIn     DateTime?
-  checkOut    DateTime?
-  createdAt   DateTime @default(now())
-}
+
 
 // 6. Complaints & AI Processing
 model Complaint {
@@ -192,28 +175,7 @@ model Transaction {
   createdAt   DateTime @default(now())
 }
 
-// 8. Facilities & Amenity Bookings
-model Facility {
-  id          String    @id @default(uuid())
-  societyId   String
-  society     Society   @relation(fields: [societyId], references: [id], onDelete: Cascade)
-  name        String
-  description String?
-  costPerHour Float     @default(0.0)
-  bookings    Booking[]
-}
 
-model Booking {
-  id          String   @id @default(uuid())
-  societyId   String
-  society     Society  @relation(fields: [societyId], references: [id], onDelete: Cascade)
-  facilityId  String
-  facility    Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
-  startTime   DateTime
-  endTime     DateTime
-  status      String   @default("CONFIRMED") // CONFIRMED, CANCELLED
-  createdAt   DateTime @default(now())
-}
 
 // 9. Notices & Broadcasts
 model Notice {

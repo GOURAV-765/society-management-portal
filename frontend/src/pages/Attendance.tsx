@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import AnimatedPage from '../components/AnimatedPage.js';
 import { useForm } from 'react-hook-form';
 import api from '../services/api.js';
 import { useToast } from '../context/ToastContext.js';
@@ -216,7 +215,7 @@ const Attendance: React.FC = () => {
   });
 
   return (
-    <AnimatedPage>
+    <div>
       <div className="p-6 max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-850 pb-6">
@@ -274,7 +273,7 @@ const Attendance: React.FC = () => {
                     </button>
                     <button
                       onClick={() => handleBulkUpdate('unmarked')}
-                      className="bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-355 text-xs font-bold px-3 py-2 rounded-xl cursor-pointer flex items-center gap-1.5"
+                      className="bg-slate-900 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-slate-300 text-xs font-bold px-3 py-2 rounded-xl cursor-pointer flex items-center gap-1.5"
                     >
                       <RefreshCw className="h-3.5 w-3.5" />
                       Reset Attendance
@@ -311,7 +310,7 @@ const Attendance: React.FC = () => {
                       </span>
                       <span className="text-3xl font-extrabold text-slate-100">{presentCount}</span>
                     </div>
-                    <div className="p-2.5 rounded-xl bg-emerald-950/40 text-emerald-450 border border-emerald-900/30">
+                    <div className="p-2.5 rounded-xl bg-emerald-950/40 text-emerald-400 border border-emerald-900/30">
                       <UserCheck className="h-6 w-6" />
                     </div>
                   </div>
@@ -323,7 +322,7 @@ const Attendance: React.FC = () => {
                       </span>
                       <span className="text-3xl font-extrabold text-slate-100">{absentCount}</span>
                     </div>
-                    <div className="p-2.5 rounded-xl bg-rose-955/40 text-rose-450 border border-rose-900/30">
+                    <div className="p-2.5 rounded-xl bg-rose-950/40 text-rose-450 border border-rose-900/30">
                       <UserX className="h-6 w-6" />
                     </div>
                   </div>
@@ -362,7 +361,7 @@ const Attendance: React.FC = () => {
                         className={`px-3.5 py-1.5 rounded-lg text-xs font-bold border uppercase tracking-wider transition-colors cursor-pointer ${
                           filter === opt
                             ? 'bg-indigo-650/20 text-indigo-400 border-indigo-550/20'
-                            : 'bg-transparent text-slate-450 border-slate-850 hover:text-slate-300'
+                            : 'bg-transparent text-slate-400 border-slate-800 hover:text-slate-300'
                         }`}
                       >
                         {opt}
@@ -392,11 +391,11 @@ const Attendance: React.FC = () => {
                               ? 'border-emerald-500/20 hover:border-emerald-500/30'
                               : status === 'absent'
                               ? 'border-rose-500/20 hover:border-rose-500/30'
-                              : 'border-slate-850 hover:border-slate-700'
+                              : 'border-slate-800 hover:border-slate-700'
                           }`}
                         >
                           <div className="flex gap-3">
-                            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-650 to-purple-650 flex items-center justify-center font-bold text-white text-sm shrink-0 shadow-md">
+                            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center font-bold text-white text-sm shrink-0 shadow-md">
                               {initials}
                             </div>
                             <div className="min-w-0">
@@ -406,19 +405,19 @@ const Attendance: React.FC = () => {
                               <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest block truncate">
                                 {member.user?.role?.name || 'Resident'}
                               </span>
-                              <span className="text-[10px] text-slate-450 truncate block mt-0.5">
+                              <span className="text-[10px] text-slate-400 truncate block mt-0.5">
                                 {member.user?.email}
                               </span>
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-3 bg-slate-900/60 p-1 rounded-xl border border-slate-850/80 text-[10px] font-bold">
+                          <div className="grid grid-cols-3 bg-slate-900/60 p-1 rounded-xl border border-slate-800/80 text-[10px] font-bold">
                             <button
                               onClick={() => handleUpdateStatus(member.id, 'present')}
                               className={`py-1.5 rounded-lg flex items-center justify-center gap-1 transition-colors cursor-pointer uppercase ${
                                 status === 'present'
                                   ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/15'
-                                  : 'text-slate-450 hover:text-slate-300'
+                                  : 'text-slate-400 hover:text-slate-300'
                               }`}
                             >
                               <CheckCircle className="h-3.5 w-3.5" />
@@ -428,8 +427,8 @@ const Attendance: React.FC = () => {
                               onClick={() => handleUpdateStatus(member.id, 'absent')}
                               className={`py-1.5 rounded-lg flex items-center justify-center gap-1 transition-colors cursor-pointer uppercase ${
                                 status === 'absent'
-                                  ? 'bg-rose-500/10 text-rose-450 border border-rose-500/15'
-                                  : 'text-slate-450 hover:text-slate-300'
+                                  ? 'bg-rose-500/10 text-rose-400 border border-rose-500/15'
+                                  : 'text-slate-400 hover:text-slate-300'
                               }`}
                             >
                               <XCircle className="h-3.5 w-3.5" />
@@ -440,7 +439,7 @@ const Attendance: React.FC = () => {
                               className={`py-1.5 rounded-lg flex items-center justify-center gap-1 transition-colors cursor-pointer uppercase ${
                                 status === 'unmarked'
                                   ? 'bg-slate-800 text-slate-200 border border-slate-700'
-                                  : 'text-slate-450 hover:text-slate-350'
+                                  : 'text-slate-400 hover:text-slate-350'
                               }`}
                             >
                               Unmarked
@@ -512,7 +511,7 @@ const Attendance: React.FC = () => {
           </div>
         )}
       </div>
-    </AnimatedPage>
+    </div>
   );
 };
 

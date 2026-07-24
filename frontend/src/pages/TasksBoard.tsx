@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import AnimatedPage from '../components/AnimatedPage.js';
 import { useForm } from 'react-hook-form';
 import api from '../services/api.js';
 import { useToast } from '../context/ToastContext.js';
@@ -175,15 +174,15 @@ const TasksBoard: React.FC = () => {
 
   const columns = [
     { id: 'todo' as const, title: 'To Do', colorClass: 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20' },
-    { id: 'in_progress' as const, title: 'In Progress', colorClass: 'bg-amber-500/10 text-amber-405 border-amber-500/20' },
+    { id: 'in_progress' as const, title: 'In Progress', colorClass: 'bg-amber-500/10 text-amber-400 border-amber-500/20' },
     { id: 'completed' as const, title: 'Completed', colorClass: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
   ];
 
   return (
-    <AnimatedPage>
+    <div>
       <div className="p-6 max-w-7xl mx-auto space-y-8">
         {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-850 pb-6">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800 pb-6">
           <div className="space-y-1">
             <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
               Tasks Board
@@ -249,7 +248,7 @@ const TasksBoard: React.FC = () => {
                               <span
                                 className={`text-[8px] font-extrabold px-1.5 py-0.5 rounded border uppercase tracking-wider ${
                                   task.priority === 'high'
-                                    ? 'bg-rose-500/10 text-rose-455 border-rose-500/20'
+                                    ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
                                     : task.priority === 'medium'
                                     ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
                                     : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
@@ -281,15 +280,15 @@ const TasksBoard: React.FC = () => {
                             </h4>
                             
                             {task.description && (
-                              <p className="text-[10px] text-slate-450 leading-relaxed">
+                              <p className="text-[10px] text-slate-400 leading-relaxed">
                                 {task.description}
                               </p>
                             )}
 
-                            <div className="flex justify-between items-center border-t border-slate-850/60 pt-2 text-[9px] text-slate-500">
+                            <div className="flex justify-between items-center border-t border-slate-800/60 pt-2 text-[9px] text-slate-500">
                               <div
                                 className={`flex items-center gap-1 ${
-                                  isOverdue ? 'text-rose-450 font-bold' : ''
+                                  isOverdue ? 'text-rose-400 font-bold' : ''
                                 }`}
                                 title={task.dueDate ? `Due date: ${task.dueDate}` : 'No due date'}
                               >
@@ -313,7 +312,7 @@ const TasksBoard: React.FC = () => {
                                   onChange={(e) =>
                                     handleMoveTask(task.id, e.target.value as any)
                                   }
-                                  className="bg-slate-950 border border-slate-800 rounded px-1 py-0.5 text-[9px] text-slate-350 focus:outline-none cursor-pointer"
+                                  className="bg-slate-950 border border-slate-800 rounded px-1 py-0.5 text-[9px] text-slate-300 focus:outline-none cursor-pointer"
                                 >
                                   <option value="todo">TODO</option>
                                   <option value="in_progress">WORK</option>
@@ -415,7 +414,7 @@ const TasksBoard: React.FC = () => {
           </div>
         )}
       </div>
-    </AnimatedPage>
+    </div>
   );
 };
 

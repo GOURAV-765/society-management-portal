@@ -9,9 +9,7 @@ export async function bootstrapDatabase() {
     const permissionNames = [
       'member:read', 'member:create', 'member:update', 'member:delete',
       'complaint:read', 'complaint:create', 'complaint:update', 'complaint:delete',
-      'notice:read', 'notice:create', 'notice:update', 'notice:delete',
-      'booking:read', 'booking:create', 'booking:update', 'booking:delete',
-      'visitor:read', 'visitor:create', 'visitor:update', 'visitor:delete'
+      'notice:read', 'notice:create', 'notice:update', 'notice:delete'
     ];
 
     const permissionsMap: Record<string, any> = {};
@@ -29,14 +27,14 @@ export async function bootstrapDatabase() {
     if (!defaultSociety) {
       defaultSociety = await prisma.society.create({
         data: {
-          name: 'Greenwood Society',
+          name: 'IEEE Society',
           address: '123 Forest Hill Road',
           city: 'Delhi',
           state: 'Delhi',
           zipCode: '110001',
         }
       });
-      console.log('👉 Created Greenwood Society as default');
+      console.log('👉 Created IEEE Society as default');
     }
 
     // 3. Ensure default roles for default society
@@ -48,9 +46,7 @@ export async function bootstrapDatabase() {
         perms: [
           'member:read', 'member:create', 'member:update',
           'complaint:read', 'complaint:create', 'complaint:update',
-          'notice:read', 'notice:create', 'notice:update',
-          'booking:read', 'booking:create', 'booking:update',
-          'visitor:read', 'visitor:create', 'visitor:update'
+          'notice:read', 'notice:create', 'notice:update'
         ]
       },
       {
@@ -58,8 +54,7 @@ export async function bootstrapDatabase() {
         desc: 'Standard member with read-only access',
         perms: [
           'member:read', 'complaint:read', 'complaint:create',
-          'notice:read', 'booking:read', 'booking:create',
-          'visitor:read', 'visitor:create'
+          'notice:read'
         ]
       }
     ];

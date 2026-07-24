@@ -9,13 +9,10 @@ async function main() {
   // 1. Clean existing records (in reverse order of dependencies)
   console.log('Cleaning old records...');
   await prisma.auditLog.deleteMany({});
-  await prisma.booking.deleteMany({});
-  await prisma.facility.deleteMany({});
   await prisma.transaction.deleteMany({});
   await prisma.complaintTask.deleteMany({});
   await prisma.attachment.deleteMany({});
   await prisma.complaint.deleteMany({});
-  await prisma.visitor.deleteMany({});
   await prisma.member.deleteMany({});
   await prisma.session.deleteMany({});
   await prisma.user.deleteMany({});
@@ -31,9 +28,7 @@ async function main() {
   const permissionNames = [
     'member:read', 'member:create', 'member:update', 'member:delete',
     'complaint:read', 'complaint:create', 'complaint:update', 'complaint:delete',
-    'notice:read', 'notice:create', 'notice:update', 'notice:delete',
-    'booking:read', 'booking:create', 'booking:update', 'booking:delete',
-    'visitor:read', 'visitor:create', 'visitor:update', 'visitor:delete'
+    'notice:read', 'notice:create', 'notice:update', 'notice:delete'
   ];
 
   const permissionsMap: Record<string, any> = {};
@@ -47,11 +42,11 @@ async function main() {
     permissionsMap[name] = permission;
   }
 
-  // 3. Create Society A: Greenwood Society
+  // 3. Create Society A: IEEE Society
   console.log('Creating societies...');
   const greenwood = await prisma.society.create({
     data: {
-      name: 'Greenwood Society',
+      name: 'IEEE Society',
       address: '123 Forest Hill Road',
       city: 'Delhi',
       state: 'Delhi',
@@ -99,9 +94,7 @@ async function main() {
     const leadPermissionNames = [
       'member:read', 'member:create', 'member:update',
       'complaint:read', 'complaint:create', 'complaint:update',
-      'notice:read', 'notice:create', 'notice:update',
-      'booking:read', 'booking:create', 'booking:update',
-      'visitor:read', 'visitor:create', 'visitor:update'
+      'notice:read', 'notice:create', 'notice:update'
     ];
     await prisma.rolePermission.createMany({
       data: leadPermissionNames.map((name) => ({
@@ -110,11 +103,10 @@ async function main() {
       })),
     });
 
-    // Member gets read-only and booking/visitor creations
+    // Member gets read-only access
     const memberPermissionNames = [
       'member:read', 'complaint:read', 'complaint:create',
-      'notice:read', 'booking:read', 'booking:create',
-      'visitor:read', 'visitor:create'
+      'notice:read'
     ];
     await prisma.rolePermission.createMany({
       data: memberPermissionNames.map((name) => ({

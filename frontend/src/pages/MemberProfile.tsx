@@ -172,7 +172,7 @@ const MemberProfile: React.FC = () => {
                 </div>
                 <div>
                   <p className="text-[10px] font-semibold text-slate-450 uppercase">Resident Society</p>
-                  <p className="text-sm text-slate-250 font-medium">{user?.societyName || 'Greenwood Society'}</p>
+                  <p className="text-sm text-slate-250 font-medium">{user?.societyName || 'IEEE Society'}</p>
                 </div>
               </div>
 

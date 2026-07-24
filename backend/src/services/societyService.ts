@@ -81,9 +81,7 @@ export class SocietyService {
       const permissionNames = [
         'member:read', 'member:create', 'member:update', 'member:delete',
         'complaint:read', 'complaint:create', 'complaint:update', 'complaint:delete',
-        'notice:read', 'notice:create', 'notice:update', 'notice:delete',
-        'booking:read', 'booking:create', 'booking:update', 'booking:delete',
-        'visitor:read', 'visitor:create', 'visitor:update', 'visitor:delete'
+        'notice:read', 'notice:create', 'notice:update', 'notice:delete'
       ];
 
       const permissions = await Promise.all(
@@ -106,7 +104,7 @@ export class SocietyService {
 
       // e. Assign read permissions to General Member
       const readPermissions = permissions.filter((p) => 
-        ['member:read', 'complaint:create', 'complaint:read', 'notice:read', 'booking:create', 'booking:read', 'visitor:create', 'visitor:read'].includes(p.name)
+        ['member:read', 'complaint:create', 'complaint:read', 'notice:read'].includes(p.name)
       );
       await tx.rolePermission.createMany({
         data: readPermissions.map((p) => ({

@@ -56,18 +56,8 @@ const Layout: React.FC = () => {
       icon: ClipboardList,
       show: hasPermission('complaint:read'),
     },
-    {
-      name: 'Visitors',
-      path: '/visitors',
-      icon: ShieldAlert,
-      show: hasPermission('visitor:read'),
-    },
-    {
-      name: 'Facility Bookings',
-      path: '/bookings',
-      icon: Calendar,
-      show: hasPermission('booking:read'),
-    },
+
+
     {
       name: 'Awards & Badges',
       path: '/awards',

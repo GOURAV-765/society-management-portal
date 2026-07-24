@@ -23,8 +23,6 @@ import authRoutes from './routes/authRoutes.js';
 import memberRoutes from './routes/memberRoutes.js';
 import announcementRoutes from './routes/announcementRoutes.js';
 import societyRoutes from './routes/societyRoutes.js';
-import visitorRoutes from './routes/visitorRoutes.js';
-import bookingRoutes from './routes/bookingRoutes.js';
 import complaintRoutes from './routes/complaintRoutes.js';
 import awardRoutes from './routes/awardRoutes.js';
 import collaborationRoutes from './routes/collaborationRoutes.js';
@@ -33,7 +31,7 @@ import meetingRoutes from './routes/meetingRoutes.js';
 import { errorHandler } from './middlewares/error.js';
 
 const app = express();
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT || 12000;
 
 // Security Middlewares
 app.use(helmet());
@@ -50,6 +48,8 @@ app.use(
         'http://127.0.0.1:5180',
         'http://localhost:5173',
         'http://127.0.0.1:5173',
+        'http://localhost:5181',
+        'http://127.0.0.1:5181',
         'https://society-management-portal-zeta.vercel.app',
       ];
 
@@ -66,6 +66,8 @@ app.use(
       }
     },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
   })
 );
 
@@ -84,8 +86,6 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/members', memberRoutes);
 app.use('/api/v1/announcements', announcementRoutes);
 app.use('/api/v1/societies', societyRoutes);
-app.use('/api/v1/visitors', visitorRoutes);
-app.use('/api/v1/bookings', bookingRoutes);
 app.use('/api/v1/complaints', complaintRoutes);
 app.use('/api/v1/awards', awardRoutes);
 app.use('/api/v1/tasks', taskRoutes);

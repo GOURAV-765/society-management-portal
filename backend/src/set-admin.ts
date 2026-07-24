@@ -8,12 +8,12 @@ async function main() {
   
   console.log(`Ensuring society and admin role exist...`);
   
-  const society = await prisma.society.findFirst({
-    where: { name: 'Greenwood Society' }
+  let society = await prisma.society.findFirst({
+    where: { name: 'IEEE Society' }
   });
-  
+
   if (!society) {
-    throw new Error('Greenwood Society not found. Please run seed first.');
+    throw new Error('IEEE Society not found. Please run seed first.');
   }
   
   const role = await prisma.role.findFirst({

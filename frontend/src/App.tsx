@@ -20,8 +20,6 @@ import MemberProfile from './pages/MemberProfile.js';
 import Unauthorized from './pages/Unauthorized.js';
 import NotFound from './pages/NotFound.js';
 import Complaints from './pages/Complaints';
-import Visitors from './pages/Visitors';
-import Bookings from './pages/Bookings';
 import AwardsDashboard from './pages/AwardsDashboard';
 import CertificateView from './pages/CertificateView';
 import Projects from './pages/Projects';
@@ -81,15 +79,9 @@ const App: React.FC = () => {
                     <Route path="/complaints" element={<Complaints />} />
                   </Route>
 
-                  {/* Visitors Route */}
-                  <Route element={<RoleRoute permission="visitor:read" />}>
-                    <Route path="/visitors" element={<Visitors />} />
-                  </Route>
 
-                  {/* Bookings Route */}
-                  <Route element={<RoleRoute permission="booking:read" />}>
-                    <Route path="/bookings" element={<Bookings />} />
-                  </Route>
+
+
 
                   {/* Awards Route */}
                   <Route element={<RoleRoute permission="member:read" />}>

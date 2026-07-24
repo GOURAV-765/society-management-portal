@@ -63,7 +63,6 @@ export const createMeeting = async (
           memberId: member.id,
           status: 'unmarked',
         })),
-        skipDuplicates: true,
       });
     }
 

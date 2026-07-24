@@ -29,6 +29,8 @@ export const initSocket = (server: HttpServer): Server => {
           'http://127.0.0.1:5180',
           'http://localhost:5173',
           'http://127.0.0.1:5173',
+          'http://localhost:5181',
+          'http://127.0.0.1:5181',
         ];
 
         const envAllowed = process.env.ALLOWED_ORIGINS
@@ -44,6 +46,8 @@ export const initSocket = (server: HttpServer): Server => {
         }
       },
       credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
     },
   });
 
