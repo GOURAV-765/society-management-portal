@@ -18,6 +18,8 @@ import {
   Trophy,
   FolderGit2,
   Cpu,
+  ClipboardCheck,
+  KanbanSquare,
 } from 'lucide-react';
 
 const Layout: React.FC = () => {
@@ -94,6 +96,18 @@ const Layout: React.FC = () => {
       name: 'AI Productivity Hub',
       path: '/ai-hub',
       icon: Cpu,
+      show: hasPermission('member:read'),
+    },
+    {
+      name: 'Attendance Logger',
+      path: '/attendance',
+      icon: ClipboardCheck,
+      show: hasPermission('member:read'),
+    },
+    {
+      name: 'Tasks Board',
+      path: '/tasks',
+      icon: KanbanSquare,
       show: hasPermission('member:read'),
     },
   ];

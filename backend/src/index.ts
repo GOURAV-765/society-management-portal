@@ -28,6 +28,8 @@ import bookingRoutes from './routes/bookingRoutes.js';
 import complaintRoutes from './routes/complaintRoutes.js';
 import awardRoutes from './routes/awardRoutes.js';
 import collaborationRoutes from './routes/collaborationRoutes.js';
+import taskRoutes from './routes/taskRoutes.js';
+import meetingRoutes from './routes/meetingRoutes.js';
 import { errorHandler } from './middlewares/error.js';
 
 const app = express();
@@ -86,6 +88,8 @@ app.use('/api/v1/visitors', visitorRoutes);
 app.use('/api/v1/bookings', bookingRoutes);
 app.use('/api/v1/complaints', complaintRoutes);
 app.use('/api/v1/awards', awardRoutes);
+app.use('/api/v1/tasks', taskRoutes);
+app.use('/api/v1/meetings', meetingRoutes);
 app.use('/api/v1', collaborationRoutes);
 
 

@@ -32,6 +32,8 @@ model Society {
   projects         Project[]
   events           Event[]
   contributions    ContributionActivity[]
+  tasks            Task[]
+  meetings         Meeting[]
 }
 
 // 2. User Authentication & Session
@@ -390,5 +392,45 @@ model ContributionActivity {
   scorePoints  Float
   date         DateTime @default(now())
 }
+
+model Task {
+  id          String   @id @default(uuid())
+  societyId   String
+  society     Society  @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  status      String   @default("todo") // todo, in_progress, completed
+  priority    String   @default("medium") // low, medium, high
+  dueDate     String?
+  assigneeId  String?  // null, member ID, or "__all__"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Meeting {
+  id          String   @id @default(uuid())
+  societyId   String
+  society     Society  @relation(fields: [societyId], references: [id], onDelete: Cascade)
+  title       String
+  date        String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  attendance  Attendance[]
+}
+
+model Attendance {
+  id        String   @id @default(uuid())
+  meetingId String
+  meeting   Meeting  @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+  memberId  String
+  status    String   // present, absent, unmarked
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([meetingId, memberId])
+}
+
 
 

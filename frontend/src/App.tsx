@@ -28,6 +28,8 @@ import Projects from './pages/Projects';
 import Events from './pages/Events';
 import Portfolio from './pages/Portfolio';
 import AiHub from './pages/AiHub';
+import Attendance from './pages/Attendance.js';
+import TasksBoard from './pages/TasksBoard.js';
 
 // Create Query Client
 const queryClient = new QueryClient({
@@ -97,6 +99,8 @@ const App: React.FC = () => {
                     <Route path="/portfolio" element={<Portfolio />} />
                     <Route path="/portfolio/:id" element={<Portfolio />} />
                     <Route path="/ai-hub" element={<AiHub />} />
+                    <Route path="/attendance" element={<Attendance />} />
+                    <Route path="/tasks" element={<TasksBoard />} />
                   </Route>
                 </Route>
               </Route>
